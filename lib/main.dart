@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+// Svepa höger för att ta bort Todos.
+// klicka på Todos för att kryssa.
+
 class Todo {
   Todo({required this.id, required this.name, required this.checked});
   final String id;
@@ -68,14 +71,14 @@ class TodoList extends StatefulWidget {
 class _TodoListState extends State<TodoList> {
   final TextEditingController _textFieldController = TextEditingController();
   final List<Todo> _todos = <Todo>[];
-  String? _apiKey; // För att lagra API-nyckeln
+  String? _apiKey;
   String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
     _registerAndFetchTodos();
-    _loadTodos(); // Ladda todo-listan från SharedPreferences
+    _loadTodos();
   }
 
   Future<void> _registerAndFetchTodos() async {
@@ -83,15 +86,13 @@ class _TodoListState extends State<TodoList> {
     await _fetchTodos();
   }
 
-  // Ladda todos från SharedPreferences
   Future<void> _loadTodos() async {
     final prefs = await SharedPreferences.getInstance();
     final todoList = prefs.getStringList('todos') ?? [];
     setState(() {
       _todos.clear();
       _todos.addAll(todoList.map((item) {
-        final parts = item
-            .split('|'); // Anta att du sparar varje todo som "id|name|checked"
+        final parts = item.split('|');
         return Todo(
           id: parts[0],
           name: parts[1],
@@ -101,11 +102,11 @@ class _TodoListState extends State<TodoList> {
     });
   }
 
-  // Spara todos till SharedPreferences
+  // Spara tod
   Future<void> _saveTodos() async {
     final prefs = await SharedPreferences.getInstance();
     List<String> todoList = _todos.map((todo) {
-      return '${todo.id}|${todo.name}|${todo.checked}'; // Spara i formatet "id|name|checked"
+      return '${todo.id}|${todo.name}|${todo.checked}';
     }).toList();
     await prefs.setStringList('todos', todoList);
   }
@@ -115,9 +116,8 @@ class _TodoListState extends State<TodoList> {
         .get(Uri.parse("https://todoapp-api.apps.k8s.gu.se/register"));
 
     if (response.statusCode == 200) {
-      _apiKey = response.body; // Direkt tilldela svaret som en sträng
+      _apiKey = response.body;
     } else {
-      // Hantera registreringsfel
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
             content: Text('Failed to register for API key: ${response.body}')),
@@ -156,8 +156,7 @@ class _TodoListState extends State<TodoList> {
       todo.checked = !todo.checked;
     });
 
-    await _saveTodos(); // Spara ändringar i todos
-    // Din API-kod här för att uppdatera på servern...
+    await _saveTodos();
   }
 
   void _addTodoItem(String name) async {
@@ -188,8 +187,7 @@ class _TodoListState extends State<TodoList> {
       _todos.remove(todo);
     });
 
-    await _saveTodos(); // Spara ändringar i todos
-    // Din API-kod här för att ta bort från servern...
+    await _saveTodos();
   }
 
   Future<void> _displayDialog() async {
